@@ -1,13 +1,13 @@
-class sequence extends uvm_sequence #(transaction);
-    `uvm_object_utils(sequence)
+class apb_sequence extends uvm_sequence #(transaction);
+    `uvm_object_utils(apb_sequence)
     
     transaction tr;
     
-    function new(string name="sequence");
+    function new(string name="apb_sequence");
         super.new(name);
     endfunction
     
-    virtual task body()
+    virtual task body();
         repeat(10)begin
             tr=transaction::type_id::create("tr");
             start_item(tr);
