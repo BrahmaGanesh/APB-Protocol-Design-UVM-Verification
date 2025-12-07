@@ -53,9 +53,9 @@
                     mem[paddr[ADDR_WIDTH-1:0]] <= pwdata;
                 else
                     prdata <= mem[paddr[ADDR_WIDTH-1:0]];
+                end
             else 
                 wait_counter <= 2'd0;
-            end
         end
     end
 
