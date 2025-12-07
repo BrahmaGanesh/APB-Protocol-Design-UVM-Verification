@@ -27,8 +27,20 @@
             prdata  <= '0;
             wait_counter <= 2'd0;
         end
-        else
+        else begin
             state   <= next_state;
+            if(state == ACCESS) begin
+                wait_counter  <= wait_counter + 1'b1;
+                if(wait_counter == 2'b1)begin
+                    if(pwrite)
+                        mem[paddr[ADDR_WIDTH-1:0]] <= pwdata;
+                    else
+                        prdata <= mem[paddr[ADDR_WIDTH-1:0]];
+                end
+            end
+            else 
+                wait_counter <= 2'd0;
+        end
     end
 
     always_comb begin
@@ -40,24 +52,9 @@
         endcase
     end
 
-    assign pready   = (wait_counter == 2'd1);
-    assign pslverr  = (paddr [ADDR_WIDTH-1:0] > 8'd255);
+    assign pready   = ((state == ACCESS) && (wait_counter == 2'd1));
+    assign pslverr  = (paddr [ADDR_WIDTH-1:0] >= 8'd128);
 
-    always_ff @(posedge pclk) begin
-        if(!presetn)
-            wait_counter <= 2'd0;
-        else begin
-            if(state == ACCESS) begin
-                wait_counter  <= wait_counter + 1'b1;
-                if(pwrite)
-                    mem[paddr[ADDR_WIDTH-1:0]] <= pwdata;
-                else
-                    prdata <= mem[paddr[ADDR_WIDTH-1:0]];
-                end
-            else 
-                wait_counter <= 2'd0;
-        end
-    end
 
 endmodule 
 
