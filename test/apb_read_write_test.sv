@@ -1,8 +1,8 @@
-class apb_write_read_test extends apb_sequence;
-    `uvm_object_utils(apb_write_read_test)
+class apb_write_read_sequence extends apb_sequence;
+    `uvm_object_utils(apb_write_read_sequence)
     transaction tr;
 
-    function new(string name="apb_write_read_test");
+    function new(string name="apb_write_read_sequence");
         super.new(name);
     endfunction
 
@@ -25,19 +25,19 @@ class apb_write_read_test extends apb_sequence;
     endtask
 endclass
 
-class apb_test extends apb_base_test;
-    `uvm_component_utils(apb_test)
+class apb_write_read_test extends apb_base_test;
+    `uvm_component_utils(apb_write_read_test)
 
-    apb_write_read_test a_wr;
+    apb_write_read_sequence a_wr;
 
-    function new(string name="apb_test", uvm_component parent);
+    function new(string name="apb_write_read_test", uvm_component parent);
         super.new(name, parent);
     endfunction
 
     task run_phase(uvm_phase phase);
         phase.raise_objection(this);
 
-        a_wr = apb_write_read_test::type_id::create("a_wr");
+        a_wr = apb_write_read_sequence::type_id::create("a_wr");
         a_wr.start(en.m_agent.seqr);
 
         phase.drop_objection(this);
