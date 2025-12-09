@@ -17,7 +17,7 @@ class driver extends uvm_driver#(transaction);
     
     virtual task run_phase(uvm_phase phase);
         
-        @(negedge vif.presetn);
+        wait(vif.presetn == 1'b0);
         @(posedge vif.presetn);
 
         vif.psel    <= 0;
