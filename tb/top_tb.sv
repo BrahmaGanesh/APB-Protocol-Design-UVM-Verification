@@ -24,10 +24,15 @@ module tb;
     
     initial begin
         vif.presetn = 0;
-        repeat(3) @(posedge vif.pclk);
+        #5;
         vif.presetn = 1;
     end
     
+    initial begin
+        $dumpfile("wvaeform.vcd");
+        $dumpvars(0, tb);
+    end
+
     initial begin
         uvm_config_db#(virtual apb_interface)::set(null,"*","vif",vif);
         run_test();
