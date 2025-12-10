@@ -18,30 +18,42 @@
 
     typedef enum logic [1:0] {IDLE,SETUP,ACCESS} state_t;
     state_t state,next_state;
-    logic [1:0] wait_counter;
+    logic access_pending;
+  	logic pready_reg;
 
     always_ff @(posedge pclk or negedge presetn) begin
         if(!presetn) begin
-            state   <= IDLE;
+            state           <= IDLE;
+            access_pending  <= 1'b0;
+            pready_reg      <= 1'b0;
+            prdata          <= '0;
             foreach(mem[i]) mem[i] <= '0;
-            prdata  <= '0;
-            wait_counter <= 2'd0;
         end
         else begin
             state   <= next_state;
-            if(state == ACCESS) begin
-                wait_counter  <= wait_counter + 1'b1;
-                if(wait_counter == 2'b1)begin
-                    if(pwrite)
-                        mem[paddr[ADDR_WIDTH-1:0]] <= pwdata;
+            if (state == SETUP) begin
+                access_pending  <= 1'b1;
+                pready_reg      <= 1'b0;
+            end
+            else if (state == ACCESS && access_pending) begin
+                    access_pending <= 1'b0;
+                    if (psel && penable) begin
+                        pready_reg <= 1'b1;
+                        if (pwrite)
+                            mem[paddr] <= pwdata;
+                        else 
+                            prdata <= mem[paddr];
+                    end
                     else
-                        prdata <= mem[paddr[ADDR_WIDTH-1:0]];
+                        pready_reg <= 1'b0;
+                end
+                else begin
+                    pready_reg <= 1'b0;
+                    if (state != ACCESS && state != SETUP)
+                        access_pending <= 1'b0;
                 end
             end
-            else 
-                wait_counter <= 2'd0;
         end
-    end
 
     always_comb begin
         next_state = state;
@@ -52,9 +64,8 @@
         endcase
     end
 
-    assign pready   = ((state == ACCESS) && (wait_counter == 2'd1));
-    assign pslverr  = (paddr [ADDR_WIDTH-1:0] >= 8'd128);
-
+    assign pready   = pready_reg;
+    assign pslverr  =  (psel && penable && pready_reg && (paddr >= 8'd128));
 
 endmodule 
 
