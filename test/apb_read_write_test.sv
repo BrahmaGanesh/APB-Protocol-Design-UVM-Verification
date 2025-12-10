@@ -9,7 +9,15 @@ class apb_write_read_sequence extends apb_sequence;
     task body();
         for (int i = 0; i <= 20; i++) begin
         tr = transaction::type_id::create("tr");
-        if (i <= 10) begin
+        if(i==0) begin 
+            assert((!tr.randomize() with { tr.pwrite == 1'b1;tr.paddr==1;tr.pwdata==32'h0000_0000; }))
+            else `uvm_error("SEQ", "Randomization failed for write transaction")
+        end
+        else if(i==1) begin 
+            assert((!tr.randomize() with { tr.pwrite == 1'b1;tr.paddr==1;tr.pwdata==32'hFFFF_FFFF; }))
+            else `uvm_error("SEQ", "Randomization failed for write transaction")
+        end
+        else if (i <= 10) begin
             if (!tr.randomize() with { tr.pwrite == 1'b1; }) begin
             `uvm_error("SEQ", "Randomization failed for write transaction")
             end
