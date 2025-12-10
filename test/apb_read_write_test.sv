@@ -8,27 +8,30 @@ class apb_write_read_sequence extends apb_sequence;
 
     task body();
         for (int i = 0; i <= 20; i++) begin
-        tr = transaction::type_id::create("tr");
-        if(i==0) begin 
-            assert((!tr.randomize() with { tr.pwrite == 1'b1;tr.paddr==1;tr.pwdata==32'h0000_0000; }))
-            else `uvm_error("SEQ", "Randomization failed for write transaction")
-        end
-        else if(i==1) begin 
-            assert((!tr.randomize() with { tr.pwrite == 1'b1;tr.paddr==1;tr.pwdata==32'hFFFF_FFFF; }))
-            else `uvm_error("SEQ", "Randomization failed for write transaction")
-        end
-        else if (i <= 10) begin
-            if (!tr.randomize() with { tr.pwrite == 1'b1; }) begin
-            `uvm_error("SEQ", "Randomization failed for write transaction")
+            tr = transaction::type_id::create("tr");
+
+            if (i == 0) begin
+                if (!tr.randomize() with { tr.pwrite == 1; tr.paddr == 1; tr.pwdata == 32'h0000_0000; }) begin
+                `uvm_error("SEQ", "Randomization failed for write transaction (all-zero)")
+                end
             end
-        end 
-        else begin
-            if (!tr.randomize() with { tr.pwrite == 1'b0; }) begin
-            `uvm_error("SEQ", "Randomization failed for read transaction")
+            else if (i == 1) begin
+                    if (!tr.randomize() with { tr.pwrite == 1; tr.paddr == 1; tr.pwdata == 32'hFFFF_FFFF; }) begin
+                    `uvm_error("SEQ", "Randomization failed for write transaction (all-ones)")
+                    end
             end
-        end
-        start_item(tr);
-        finish_item(tr);
+            else if (i <= 10) begin
+                    if (!tr.randomize() with { tr.pwrite == 1; }) begin
+                    `uvm_error("SEQ", "Randomization failed for write transaction")
+                    end
+            end
+            else begin
+                if (!tr.randomize() with { tr.pwrite == 0; }) begin
+                `uvm_error("SEQ", "Randomization failed for read transaction")
+                end
+            end
+            start_item(tr);
+            finish_item(tr);
         end
     endtask
 endclass
